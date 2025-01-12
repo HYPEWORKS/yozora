@@ -1,0 +1,18 @@
+{
+  "$schema": "https://wails.io/schemas/config.v2.json",
+  "name": "Yozora",
+  "outputfilename": "Yozora",
+  "frontend:install": "pnpm i",
+  "frontend:build": "pnpm build",
+  "frontend:dev:watcher": "pnpm dev",
+  "frontend:dev:serverUrl": "auto",
+  "author": {
+    "name": "Josh Kennedy",
+    "email": "976307+YoCodingJosh@users.noreply.github.com"
+  },
+  "info": {
+    "companyName": "HYPEWORKS",
+    "companyURL": "https://hypeworks.com",
+    "copyright": "Copyright © 2025 HYPEWORKS"
+  }
+}
