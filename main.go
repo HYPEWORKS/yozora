@@ -28,7 +28,7 @@ func main() {
 		Bind: []interface{}{
 			app,
 		},
-		StartHidden: true,
+		StartHidden: true, // so we don't get the initial flash of white
 	})
 
 	if err != nil {

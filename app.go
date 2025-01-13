@@ -5,11 +5,16 @@ import (
 	"fmt"
 
 	"github.com/wailsapp/wails/v2/pkg/runtime"
+	"hypeworks.com/yozora/plugins"
+
+	base64plugin "hypeworks.com/yozora/plugins/base64"
+	loremipsumplugin "hypeworks.com/yozora/plugins/lorem-ipsum"
 )
 
 // App struct
 type App struct {
-	ctx context.Context
+	ctx           context.Context
+	pluginManager *plugins.PluginManager
 }
 
 // NewApp creates a new App application struct
@@ -21,6 +26,12 @@ func NewApp() *App {
 // so we can call the runtime methods
 func (a *App) startup(ctx context.Context) {
 	a.ctx = ctx
+
+	a.pluginManager = plugins.NewPluginManager()
+
+	// Register the plugins
+	base64plugin.Register(a.pluginManager)
+	loremipsumplugin.Register(a.pluginManager)
 }
 
 func (a *App) OnAppStarted() {
@@ -28,7 +39,11 @@ func (a *App) OnAppStarted() {
 	runtime.WindowShow(a.ctx)
 }
 
-// Greet returns a greeting for the given name
-func (a *App) Greet(name string) string {
-	return fmt.Sprintf("Hello %s, It's show time!", name)
+// Get a list of registered plugin ids so that we know what we can call
+func (a *App) GetRegisteredPlugins() []string {
+	return a.pluginManager.GetRegisteredPlugins()
+}
+
+func (a *App) CallPlugin(pluginID, functionName string, args ...interface{}) (interface{}, error) {
+	return a.pluginManager.Call(pluginID, functionName, args...)
 }

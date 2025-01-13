@@ -1,46 +1,75 @@
-import { useEffect, useState } from "react";
-import logo from "./assets/images/logo-universal.png";
-import { Greet, OnAppStarted } from "../wailsjs/go/main/App";
-import { Input } from "./components/ui/input";
-import { Button } from "./components/ui/button";
+import { useEffect, useState, useMemo, Suspense } from "react";
+import {
+  OnAppStarted,
+  GetRegisteredPlugins,
+} from "../wailsjs/go/main/App";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "./components/ui/select";
+import plugins from "./plugins";
+import React from "react";
 
 function App() {
-  const [resultText, setResultText] = useState(
-    "Please enter your name below 👇"
-  );
-  const [name, setName] = useState("");
-  const updateName = (e: any) => setName(e.target.value);
-  const updateResultText = (result: string) => setResultText(result);
+  const [availablePluginIDs, setAvailablePluginIDs] = useState<string[]>([]);
+  const updateAvailablePluginIDs = (pluginIDs: string[]) =>
+    setAvailablePluginIDs(pluginIDs);
+  const [selectedPluginID, setSelectedPluginID] = useState<string | null>(null);
 
-  function greet() {
-    Greet(name).then(updateResultText);
-  }
+  const pluginComponent = useMemo(() => {
+    if (!selectedPluginID) {
+      return null;
+    }
+
+    const plugin = plugins[selectedPluginID];
+    if (!plugin) {
+      return null;
+    }
+
+    return React.createElement(plugin.component);
+  }, [selectedPluginID]);
 
   useEffect(() => {
     setTimeout(() => {
-      // yes, this is async but we don't care about the result
-      OnAppStarted()
+      OnAppStarted().then(() => {
+        GetRegisteredPlugins().then(updateAvailablePluginIDs);
+      });
     }, 0);
   }, []);
 
   return (
     <main className="flex flex-col min-h-svh p-3">
       <h1 className="text-2xl text-center pb-6">Hello Yozora!</h1>
-      <div id="result" className="result">
-        {resultText}
-      </div>
-      <div id="input" className="input-box">
-        <Input
-          id="name"
-          className="input"
-          onChange={updateName}
-          autoComplete="off"
-          name="input"
-          type="text"
-        />
-        <Button className="btn" onClick={greet}>
-          Greet
-        </Button>
+      <div>
+        <Select onValueChange={setSelectedPluginID}>
+          <SelectTrigger className="w-[240px]">
+            <SelectValue placeholder="Select a plugin" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectGroup>
+              {availablePluginIDs.map((pluginID) => {
+                const plugin = plugins[pluginID];
+                return (
+                  <SelectItem key={pluginID} value={pluginID}>
+                    {plugin.name}
+                  </SelectItem>
+                );
+              })}
+            </SelectGroup>
+          </SelectContent>
+        </Select>
+
+        <div>
+          {pluginComponent && (
+            <Suspense fallback={<div>Loading...</div>}>
+              {pluginComponent}
+            </Suspense>
+          )}
+        </div>
       </div>
     </main>
   );
