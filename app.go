@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/google/uuid"
 	"github.com/wailsapp/wails/v2/pkg/runtime"
 	"hypeworks.com/yozora/plugins"
 
@@ -37,6 +38,10 @@ func (a *App) startup(ctx context.Context) {
 func (a *App) OnAppStarted() {
 	fmt.Println("App started!")
 	runtime.WindowShow(a.ctx)
+}
+
+func (a *App) GenerateUUID() string {
+	return uuid.New().String()
 }
 
 // Get a list of registered plugin ids so that we know what we can call

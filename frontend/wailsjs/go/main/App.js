@@ -6,6 +6,10 @@ export function CallPlugin(arg1, arg2, arg3) {
   return window['go']['main']['App']['CallPlugin'](arg1, arg2, arg3);
 }
 
+export function GenerateUUID() {
+  return window['go']['main']['App']['GenerateUUID']();
+}
+
 export function GetRegisteredPlugins() {
   return window['go']['main']['App']['GetRegisteredPlugins']();
 }

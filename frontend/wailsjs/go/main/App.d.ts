@@ -3,6 +3,8 @@
 
 export function CallPlugin(arg1:string,arg2:string,arg3:Array<any>):Promise<any>;
 
+export function GenerateUUID():Promise<string>;
+
 export function GetRegisteredPlugins():Promise<Array<string>>;
 
 export function OnAppStarted():Promise<void>;

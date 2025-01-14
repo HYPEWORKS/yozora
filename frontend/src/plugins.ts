@@ -9,7 +9,7 @@ export type Plugin = {
   component: LazyExoticComponent<ComponentType<any>>;
 };
 
-const plugins: Record<string, Plugin> = {
+const backendPlugins: Record<string, Plugin> = {
   "base64": {
     name: "Base64 Encoder/Decoder",
     component: lazy(() => import("./plugins/base64")),
@@ -19,5 +19,21 @@ const plugins: Record<string, Plugin> = {
     component: lazy(() => import("./plugins/lorem-ipsum")),
   },
 };
+
+const frontendPlugins: Record<string, Plugin> = {
+  "json": {
+    name: "JSON Tools",
+    component: lazy(() => import("./plugins/json")),
+  },
+};
+
+const plugins = {
+  ...backendPlugins,
+  ...frontendPlugins,
+};
+
+export function getRegisteredFrontendPlugins() {
+  return Object.keys(frontendPlugins);
+}
 
 export default plugins;

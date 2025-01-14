@@ -1,8 +1,5 @@
 import { useEffect, useState, useMemo, Suspense } from "react";
-import {
-  OnAppStarted,
-  GetRegisteredPlugins,
-} from "../wailsjs/go/main/App";
+import { OnAppStarted, GetRegisteredPlugins } from "../wailsjs/go/main/App";
 import {
   Select,
   SelectContent,
@@ -11,13 +8,20 @@ import {
   SelectTrigger,
   SelectValue,
 } from "./components/ui/select";
-import plugins from "./plugins";
+import plugins, { getRegisteredFrontendPlugins } from "./plugins";
 import React from "react";
+import CharmBar from "./components/CharmBar";
 
 function App() {
   const [availablePluginIDs, setAvailablePluginIDs] = useState<string[]>([]);
-  const updateAvailablePluginIDs = (pluginIDs: string[]) =>
-    setAvailablePluginIDs(pluginIDs);
+  const updateAvailablePluginIDs = (registeredBackendPluginIDs: string[]) => {
+    const allPluginIDs = [
+      ...registeredBackendPluginIDs,
+      ...getRegisteredFrontendPlugins(),
+    ];
+    
+    setAvailablePluginIDs(allPluginIDs);
+  }
   const [selectedPluginID, setSelectedPluginID] = useState<string | null>(null);
 
   const pluginComponent = useMemo(() => {
@@ -42,36 +46,39 @@ function App() {
   }, []);
 
   return (
-    <main className="flex flex-col min-h-svh p-3">
-      <h1 className="text-2xl text-center pb-6">Hello Yozora!</h1>
-      <div>
-        <Select onValueChange={setSelectedPluginID}>
-          <SelectTrigger className="w-[240px]">
-            <SelectValue placeholder="Select a plugin" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectGroup>
-              {availablePluginIDs.map((pluginID) => {
-                const plugin = plugins[pluginID];
-                return (
-                  <SelectItem key={pluginID} value={pluginID}>
-                    {plugin.name}
-                  </SelectItem>
-                );
-              })}
-            </SelectGroup>
-          </SelectContent>
-        </Select>
-
+    <>
+      <CharmBar />
+      <main className="ml-16 flex flex-col min-h-svh p-3">
+        <h1 className="text-2xl text-center pb-6">Hello Yozora!</h1>
         <div>
-          {pluginComponent && (
-            <Suspense fallback={<div>Loading...</div>}>
-              {pluginComponent}
-            </Suspense>
-          )}
+          <Select onValueChange={setSelectedPluginID}>
+            <SelectTrigger className="w-[240px]">
+              <SelectValue placeholder="Select a plugin" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectGroup>
+                {availablePluginIDs.map((pluginID) => {
+                  const plugin = plugins[pluginID];
+                  return (
+                    <SelectItem key={pluginID} value={pluginID}>
+                      {plugin.name}
+                    </SelectItem>
+                  );
+                })}
+              </SelectGroup>
+            </SelectContent>
+          </Select>
+
+          <div className="@container/plugin">
+            {pluginComponent && (
+              <Suspense fallback={<div>Loading...</div>}>
+                {pluginComponent}
+              </Suspense>
+            )}
+          </div>
         </div>
-      </div>
-    </main>
+      </main>
+    </>
   );
 }
 
