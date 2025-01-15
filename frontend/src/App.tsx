@@ -10,7 +10,8 @@ import {
 } from "./components/ui/select";
 import plugins, { getRegisteredFrontendPlugins } from "./plugins";
 import React from "react";
-import CharmBar from "./components/CharmBar";
+import CharmBar from "@/components/CharmBar";
+import TabBar, { Tab } from "@/components/TabBar";
 
 function App() {
   const [availablePluginIDs, setAvailablePluginIDs] = useState<string[]>([]);
@@ -19,10 +20,45 @@ function App() {
       ...registeredBackendPluginIDs,
       ...getRegisteredFrontendPlugins(),
     ];
-    
+
     setAvailablePluginIDs(allPluginIDs);
-  }
+  };
   const [selectedPluginID, setSelectedPluginID] = useState<string | null>(null);
+
+  const [tabs, setTabs] = useState<Tab[]>([
+    { id: 1, label: "Start" },
+    { id: 2, label: "JSON Tools" },
+    { id: 3, label: "Base64 Encode/Decode" },
+    { id: 4, label: "Lorem Ipsum" },
+  ]);
+  const [activeTabId, setActiveTabId] = useState<number>(tabs[0].id);
+
+  const handleChangeTab = (id: number) => {
+    setActiveTabId(id);
+  };
+
+  const handleCloseTab = (id: number) => {
+    setTabs((prev) => prev.filter((tab) => tab.id !== id));
+    // If the closed tab was active, switch to another one (optional logic)
+    if (id === activeTabId && tabs.length > 1) {
+      const nextActive = tabs.find((t) => t.id !== id);
+      if (nextActive) setActiveTabId(nextActive.id);
+    }
+
+    // If the closed tab was the last one, create a new one (optional logic)
+    if (id === activeTabId && tabs.length === 1) {
+      const newTab = { id: 1, label: "Start" };
+      setTabs([newTab]);
+      setActiveTabId(newTab.id);
+    }
+  };
+
+  const handleNewTab = () => {
+    const newId = Math.max(...tabs.map((t) => t.id)) + 1;
+    const newTab = { id: newId, label: `Untitled-${newId}.txt` };
+    setTabs((prev) => [...prev, newTab]);
+    setActiveTabId(newId);
+  };
 
   const pluginComponent = useMemo(() => {
     if (!selectedPluginID) {
@@ -48,9 +84,16 @@ function App() {
   return (
     <>
       <CharmBar />
+      <TabBar
+        className="ml-16"
+        tabs={tabs}
+        activeTabId={activeTabId}
+        onChangeTab={handleChangeTab}
+        onCloseTab={handleCloseTab}
+        onNewTab={handleNewTab}
+      />
       <main className="ml-16 flex flex-col min-h-svh p-3">
-        <h1 className="text-2xl text-center pb-6">Hello Yozora!</h1>
-        <div>
+        <div className="mt-16">
           <Select onValueChange={setSelectedPluginID}>
             <SelectTrigger className="w-[240px]">
               <SelectValue placeholder="Select a plugin" />
