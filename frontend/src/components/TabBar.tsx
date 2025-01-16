@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useRef } from "react";
 import { cn } from "@/lib/utils";
 
 export interface Tab {
@@ -15,7 +15,7 @@ export interface TabBarProps {
   className?: string;
 }
 
-// TODO: still need to handle scrolling if there are too many tabs and using mousewheel and keyboard shortcuts
+// TODO: still need to handle keyboard shortcuts
 
 const TabBar: React.FC<TabBarProps> = ({
   tabs,
@@ -25,43 +25,58 @@ const TabBar: React.FC<TabBarProps> = ({
   onNewTab,
   className,
 }) => {
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+
+  const handleWheel = (e: React.WheelEvent) => {
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollLeft += e.deltaY;
+      e.preventDefault(); // Prevent default vertical scrolling
+    }
+  };
+
   return (
     <div className={cn("flex items-center bg-gray-200", className)}>
-      {/* Tabs */}
-      {tabs.map((tab) => {
-        const isActive = tab.id === activeTabId;
-        return (
-          <button
-            key={tab.id}
-            onClick={() => onChangeTab(tab.id)}
-            className={`
-              relative flex items-center px-4 py-2 
-              text-sm font-medium
-              hover:bg-gray-300
-              focus:outline-none
-              ${isActive ? "bg-white text-blue-600" : "text-gray-700"}
-            `}
-          >
-            {/* Active indicator (thin bottom border) */}
-            {isActive && (
-              <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-500" />
-            )}
-
-            <span className="mr-2">{tab.label}</span>
-
-            {/* Close button */}
-            <span
-              onClick={(e) => {
-                e.stopPropagation(); // prevent switching tabs if close clicked
-                onCloseTab(tab.id);
-              }}
-              className="ml-auto text-gray-500 hover:text-gray-700 cursor-pointer"
+      <div
+        ref={scrollContainerRef}
+        onWheel={handleWheel}
+        className="flex overflow-x-auto whitespace-nowrap scrollbar-hide"
+      >
+        {/* Tabs */}
+        {tabs.map((tab) => {
+          const isActive = tab.id === activeTabId;
+          return (
+            <button
+              key={tab.id}
+              onClick={() => onChangeTab(tab.id)}
+              className={`
+                relative flex items-center px-4 py-2 
+                text-sm font-medium
+                hover:bg-gray-300
+                focus:outline-none
+                ${isActive ? "bg-white text-blue-600" : "text-gray-700"}
+              `}
             >
-              ×
-            </span>
-          </button>
-        );
-      })}
+              {/* Active indicator (thin bottom border) */}
+              {isActive && (
+                <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-500" />
+              )}
+
+              <span className="mr-2">{tab.label}</span>
+
+              {/* Close button */}
+              <span
+                onClick={(e) => {
+                  e.stopPropagation(); // prevent switching tabs if close clicked
+                  onCloseTab(tab.id);
+                }}
+                className="ml-auto text-gray-500 hover:text-gray-700 cursor-pointer"
+              >
+                ×
+              </span>
+            </button>
+          );
+        })}
+      </div>
 
       {/* New Tab (+) Button */}
       <button

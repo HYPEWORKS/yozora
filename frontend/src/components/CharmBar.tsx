@@ -16,6 +16,9 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { TooltipArrow } from "@radix-ui/react-tooltip";
+import * as TooltipPrimitive from "@radix-ui/react-tooltip";
+import { Dialog, DialogTrigger } from "./ui/dialog";
+import About from "./About";
 
 function SettingsCharm({ className }: { className?: string }) {
   // This state is literally only used to keep the icon highlight color when the dropdown is open because we have the icon wrapped in a tooltip
@@ -23,29 +26,43 @@ function SettingsCharm({ className }: { className?: string }) {
 
   return (
     <>
-      <DropdownMenu onOpenChange={setIsOpen}>
-        <DropdownMenuTrigger>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Cog size={28} className={cn("cursor-pointer text-gray-400 hover:text-white transition-all duration-200", isOpen ? "text-white" : "", className)} />
-            </TooltipTrigger>
-            <TooltipContent side="right" align="center" sideOffset={10}>
-              <p>Settings</p>
-              <TooltipArrow width={12} height={10} />
-            </TooltipContent>
-          </Tooltip>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent>
-          <DropdownMenuLabel>Settings</DropdownMenuLabel>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem>Check for Updates...</DropdownMenuItem>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem>Something else</DropdownMenuItem>
-          <DropdownMenuItem>Another thing</DropdownMenuItem>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem>About...</DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
+      <Dialog>
+        <DropdownMenu onOpenChange={setIsOpen}>
+          <DropdownMenuTrigger>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Cog
+                  size={28}
+                  className={cn(
+                    "cursor-pointer text-gray-400 hover:text-white transition-all duration-200",
+                    isOpen ? "text-white" : "",
+                    className
+                  )}
+                />
+              </TooltipTrigger>
+              <TooltipPrimitive.Portal>
+                <TooltipContent side="right" align="center" sideOffset={10}>
+                  <p>Settings</p>
+                  <TooltipArrow width={12} height={10} />
+                </TooltipContent>
+              </TooltipPrimitive.Portal>
+            </Tooltip>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent>
+            <DropdownMenuLabel>Settings</DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem>Check for Updates...</DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem>Something else</DropdownMenuItem>
+            <DropdownMenuItem>Another thing</DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DialogTrigger asChild>
+              <DropdownMenuItem>About...</DropdownMenuItem>
+            </DialogTrigger>
+          </DropdownMenuContent>
+        </DropdownMenu>
+        <About />
+      </Dialog>
     </>
   );
 }

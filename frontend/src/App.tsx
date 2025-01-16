@@ -39,13 +39,13 @@ function App() {
 
   const handleCloseTab = (id: number) => {
     setTabs((prev) => prev.filter((tab) => tab.id !== id));
-    // If the closed tab was active, switch to another one (optional logic)
+    // If the closed tab was active, switch to another one
     if (id === activeTabId && tabs.length > 1) {
       const nextActive = tabs.find((t) => t.id !== id);
       if (nextActive) setActiveTabId(nextActive.id);
     }
 
-    // If the closed tab was the last one, create a new one (optional logic)
+    // If the closed tab was the last one, create a new one
     if (id === activeTabId && tabs.length === 1) {
       const newTab = { id: 1, label: "Start" };
       setTabs([newTab]);
@@ -55,7 +55,7 @@ function App() {
 
   const handleNewTab = () => {
     const newId = Math.max(...tabs.map((t) => t.id)) + 1;
-    const newTab = { id: newId, label: `Untitled-${newId}.txt` };
+    const newTab = { id: newId, label: `Untitled-${newId}.txt` }; // TODO: make this more dynamic
     setTabs((prev) => [...prev, newTab]);
     setActiveTabId(newId);
   };
@@ -83,17 +83,19 @@ function App() {
 
   return (
     <>
-      <CharmBar />
-      <TabBar
-        className="ml-16"
-        tabs={tabs}
-        activeTabId={activeTabId}
-        onChangeTab={handleChangeTab}
-        onCloseTab={handleCloseTab}
-        onNewTab={handleNewTab}
-      />
+      <span>
+        <CharmBar />
+        <TabBar
+          className="ml-16"
+          tabs={tabs}
+          activeTabId={activeTabId}
+          onChangeTab={handleChangeTab}
+          onCloseTab={handleCloseTab}
+          onNewTab={handleNewTab}
+        />
+      </span>
       <main className="ml-16 flex flex-col min-h-svh p-3">
-        <div className="mt-16">
+        <div>
           <Select onValueChange={setSelectedPluginID}>
             <SelectTrigger className="w-[240px]">
               <SelectValue placeholder="Select a plugin" />
