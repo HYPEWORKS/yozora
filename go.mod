@@ -6,7 +6,7 @@ toolchain go1.23.5
 
 require (
 	github.com/go-loremipsum/loremipsum v1.1.3
-	github.com/google/uuid v1.3.0
+	github.com/google/uuid v1.6.0
 	github.com/wailsapp/wails/v2 v2.9.2
 )
 
