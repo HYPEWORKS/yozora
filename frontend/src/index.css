@@ -77,3 +77,20 @@ body {
 button, input[type="button"], input[type="submit"], input[type="reset"] {
   cursor: pointer;
 }
+
+/* animations */
+
+@keyframes slide-in {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.animate-slide-in {
+  animation: slide-in 0.15s ease-out;
+}

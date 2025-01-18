@@ -12,6 +12,7 @@ import plugins, { getRegisteredFrontendPlugins } from "./plugins";
 import React from "react";
 import CharmBar from "@/components/CharmBar";
 import TabBar, { Tab } from "@/components/TabBar";
+import { Toaster } from "./components/ui/toaster";
 
 function App() {
   const [availablePluginIDs, setAvailablePluginIDs] = useState<string[]>([]);
@@ -123,6 +124,7 @@ function App() {
           </div>
         </div>
       </main>
+      <Toaster />
     </>
   );
 }
