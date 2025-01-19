@@ -8,6 +8,8 @@ export type Plugin = {
   name: string;
   description: string;
   component: LazyExoticComponent<ComponentType<any>>;
+  beta?: boolean;
+  order?: number;
 };
 
 const backendPlugins: Record<string, Plugin> = {

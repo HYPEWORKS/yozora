@@ -20,7 +20,11 @@ function App() {
     const allPluginIDs = [
       ...registeredBackendPluginIDs,
       ...getRegisteredFrontendPlugins(),
-    ];
+    ].sort((a, b) => {
+      const pluginA = plugins[a];
+      const pluginB = plugins[b];
+      return (pluginA.order ?? 0) - (pluginB.order ?? 0);
+    });
 
     setAvailablePluginIDs(allPluginIDs);
   };
@@ -28,9 +32,9 @@ function App() {
 
   const [tabs, setTabs] = useState<Tab[]>([
     { id: 1, label: "Start" },
-    { id: 2, label: "JSON Tools" },
-    { id: 3, label: "Base64 Encode/Decode" },
-    { id: 4, label: "Lorem Ipsum" },
+    // { id: 2, label: "JSON Tools" },
+    // { id: 3, label: "Base64 Encode/Decode" },
+    // { id: 4, label: "Lorem Ipsum" },
   ]);
   const [activeTabId, setActiveTabId] = useState<number>(tabs[0].id);
 
@@ -98,7 +102,7 @@ function App() {
       <main className="ml-16 flex flex-col min-h-svh p-3">
         <div>
           <Select onValueChange={setSelectedPluginID}>
-            <SelectTrigger className="w-[240px]">
+            <SelectTrigger className="w-96 relative">
               <SelectValue placeholder="Select a plugin" />
             </SelectTrigger>
             <SelectContent>
@@ -106,16 +110,21 @@ function App() {
                 {availablePluginIDs.map((pluginID) => {
                   const plugin = plugins[pluginID];
                   return (
-                    <SelectItem key={pluginID} value={pluginID}>
-                      {plugin.name}
-                    </SelectItem>
+                    <SelectItem key={pluginID} value={pluginID} className="relative flex items-center">
+                      <span className="flex-grow">{plugin.name}</span>
+                      {plugin.beta && (
+                        <span className="absolute left-[19rem] text-xs p-1 bg-orange-500 text-white">
+                          Beta
+                        </span>
+                      )}
+                  </SelectItem>
                   );
                 })}
               </SelectGroup>
             </SelectContent>
           </Select>
 
-          <div className="@container/plugin">
+          <div className="@container/plugin pt-6">
             {pluginComponent && (
               <Suspense fallback={<div>Loading...</div>}>
                 {pluginComponent}
