@@ -1,16 +1,25 @@
 package plugins
 
-import "fmt"
+import (
+	"context"
+	"fmt"
+
+	"github.com/wailsapp/wails/v2/pkg/runtime"
+)
 
 type PluginFunc func(args ...interface{}) (interface{}, error)
 
 type PluginManager struct {
 	plugins map[string]map[string]PluginFunc
+
+	// The Context from Wails to call runtime functions
+	Context context.Context
 }
 
-func NewPluginManager() *PluginManager {
+func NewPluginManager(ctx context.Context) *PluginManager {
 	return &PluginManager{
 		plugins: make(map[string]map[string]PluginFunc),
+		Context: ctx,
 	}
 }
 
@@ -34,4 +43,8 @@ func (pm *PluginManager) GetRegisteredPlugins() []string {
 		plugins = append(plugins, plugin)
 	}
 	return plugins
+}
+
+func (pm *PluginManager) LogPrintf(format string, args ...interface{}) {
+	runtime.LogPrintf(pm.Context, format, args...)
 }

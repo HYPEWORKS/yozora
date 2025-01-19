@@ -10,6 +10,7 @@ import (
 
 	base64plugin "hypeworks.com/yozora/plugins/base64"
 	loremipsumplugin "hypeworks.com/yozora/plugins/lorem-ipsum"
+	qrcodeplugin "hypeworks.com/yozora/plugins/qr-code"
 )
 
 // App struct
@@ -28,11 +29,12 @@ func NewApp() *App {
 func (a *App) startup(ctx context.Context) {
 	a.ctx = ctx
 
-	a.pluginManager = plugins.NewPluginManager()
+	a.pluginManager = plugins.NewPluginManager(a.ctx)
 
 	// Register the plugins
 	base64plugin.Register(a.pluginManager)
 	loremipsumplugin.Register(a.pluginManager)
+	qrcodeplugin.Register(a.pluginManager)
 }
 
 func (a *App) OnAppStarted() {
