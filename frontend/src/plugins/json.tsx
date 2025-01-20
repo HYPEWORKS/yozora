@@ -15,11 +15,17 @@ export default function Json() {
 
   // TODO: fix the height of the editor being wacky
 
+  // TODO: make tabs/spaces and tab size configurable
+
   return (
     <div className="flex flex-col max-h-fit">
       <div className="flex justify-between items-center">
-        <Button className="mb-3" onClick={prettify}>Prettify</Button>
-        <Button className="mb-3" onClick={minify}>Minify</Button>
+        <Button className="mb-3" onClick={prettify}>
+          Prettify
+        </Button>
+        <Button className="mb-3" onClick={minify}>
+          Minify
+        </Button>
       </div>
       <div className="flex-grow">
         <Editor
@@ -29,7 +35,9 @@ export default function Json() {
           options={{
             automaticLayout: true,
             scrollBeyondLastLine: true,
-            wordWrap: "on", 
+            wordWrap: "on",
+            insertSpaces: true,
+            tabSize: 2,
           }}
           value={json}
           onChange={(value) => {
