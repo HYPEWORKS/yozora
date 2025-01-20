@@ -99,7 +99,7 @@ function App() {
           onNewTab={handleNewTab}
         />
       </span>
-      <main className="ml-16 flex flex-col min-h-svh p-3">
+      <main className="ml-16 flex flex-col min-h-fit p-3">
         <div>
           <Select onValueChange={setSelectedPluginID}>
             <SelectTrigger className="w-96 relative">

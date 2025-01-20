@@ -13,8 +13,6 @@ export default function Json() {
     setJson(JSON.stringify(JSON.parse(json)));
   }, [json]);
 
-  // TODO: fix the height of the editor being wacky
-
   // TODO: make tabs/spaces and tab size configurable
 
   return (
@@ -27,11 +25,10 @@ export default function Json() {
           Minify
         </Button>
       </div>
-      <div className="flex-grow">
+      <div className="flex-grow" style={{ height: "calc(100vh - 180px)" }}>
         <Editor
           language="json"
           theme="vs-dark"
-          height="85svh"
           options={{
             automaticLayout: true,
             scrollBeyondLastLine: true,
