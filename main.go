@@ -28,7 +28,8 @@ func main() {
 		Bind: []interface{}{
 			app,
 		},
-		StartHidden: true, // so we don't get the initial flash of white
+		StartHidden:              true, // so we don't get the initial flash of white
+		EnableDefaultContextMenu: true, // enable context menu for inputs
 	})
 
 	if err != nil {

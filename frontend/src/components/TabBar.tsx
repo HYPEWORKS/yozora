@@ -1,5 +1,12 @@
-import React, { useRef, useState } from "react";
-import { cn } from "@/lib/utils";
+import React, { useMemo, useRef, useState } from "react";
+import { cn, getModifierKey } from "@/lib/utils";
+import {
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuShortcut,
+  ContextMenuTrigger,
+} from "./ui/context-menu";
 
 export interface Tab {
   id: number;
@@ -25,6 +32,8 @@ const TabBar: React.FC<TabBarProps> = ({
   onNewTab,
   className,
 }) => {
+  const modifierKey = useMemo(getModifierKey, []);
+
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   const [newTabId, setNewTabId] = useState<number | null>(null);
@@ -60,36 +69,46 @@ const TabBar: React.FC<TabBarProps> = ({
           const isNew = tab.id === newTabId;
 
           return (
-            <button
-              key={tab.id}
-              onClick={() => onChangeTab(tab.id)}
-              className={cn(
-                "relative flex items-center px-4 py-2 text-sm font-medium hover:bg-gray-300 focus:outline-none transition-transform",
-                {
-                  "bg-white text-blue-600": isActive,
-                  "text-gray-700": !isActive,
-                  "animate-slide-in": isNew,
-                }
-              )}
-            >
-              {/* Active indicator (thin bottom border) */}
-              {isActive && (
-                <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-500" />
-              )}
+            <ContextMenu>
+              <ContextMenuTrigger>
+                <button
+                  key={tab.id}
+                  onClick={() => onChangeTab(tab.id)}
+                  className={cn(
+                    "relative flex items-center px-4 py-2 text-sm font-medium hover:bg-gray-300 focus:outline-none transition-transform",
+                    {
+                      "bg-white text-blue-600": isActive,
+                      "text-gray-700": !isActive,
+                      "animate-slide-in": isNew,
+                    }
+                  )}
+                >
+                  {/* Active indicator (thin bottom border) */}
+                  {isActive && (
+                    <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-500" />
+                  )}
 
-              <span className="mr-2">{tab.label}</span>
+                  <span className="mr-2">{tab.label}</span>
 
-              {/* Close button */}
-              <span
-                onClick={(e) => {
-                  e.stopPropagation(); // prevent switching tabs if close clicked
-                  onCloseTab(tab.id);
-                }}
-                className="ml-auto text-gray-500 hover:text-gray-700 cursor-pointer"
-              >
-                ×
-              </span>
-            </button>
+                  {/* Close button */}
+                  <span
+                    onClick={(e) => {
+                      e.stopPropagation(); // prevent switching tabs if close clicked
+                      onCloseTab(tab.id);
+                    }}
+                    className="ml-auto text-gray-500 hover:text-gray-700 cursor-pointer"
+                  >
+                    ×
+                  </span>
+                </button>
+              </ContextMenuTrigger>
+              <ContextMenuContent>
+                <ContextMenuItem>
+                  Close
+                  <ContextMenuShortcut>{modifierKey} + W</ContextMenuShortcut>
+                </ContextMenuItem>
+              </ContextMenuContent>
+            </ContextMenu>
           );
         })}
       </div>
