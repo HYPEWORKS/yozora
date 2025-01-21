@@ -1,36 +1,44 @@
 package qrcodeplugin
 
 import (
-	"fmt"
+	"encoding/base64"
 	"os"
 
+	json "github.com/goccy/go-json"
 	"github.com/wailsapp/wails/v2/pkg/runtime"
 	"hypeworks.com/yozora/plugins"
 )
 
+type QRCodeInput struct {
+	ImageBlob string `json:"imageBlob"`
+}
+
+type QRCodeOutput struct {
+	Ok bool `json:"ok"`
+}
+
 func Register(pm *plugins.PluginManager) {
 	pm.RegisterPlugin("qr-code", map[string]plugins.PluginFunc{
-		"save": func(args ...interface{}) (interface{}, error) {
-			if len(args) != 1 {
-				return nil, fmt.Errorf("save expects exactly 1 argument")
+		"save": func(args string) string {
+			pm.LogPrintf("Saving QR Code")
+
+			var input QRCodeInput
+			err := json.Unmarshal([]byte(args), &input)
+
+			pm.LogPrintf("Input: %v", input)
+
+			if err != nil {
+				return pm.Errorf("failed to unmarshal input: %v", err)
 			}
 
-			// Check if the argument is a slice of interface{}
-			byteSlice, ok := args[0].([]interface{})
-			if !ok {
-				return nil, fmt.Errorf("input is not a valid array of bytes: %#v", args[0])
+			// decode the base64 string
+			blob, err := base64.StdEncoding.DecodeString(input.ImageBlob)
+
+			if err != nil {
+				return pm.Errorf("failed to decode input: %v", err)
 			}
 
-			// Convert the slice of interface{} to a slice of bytes
-			blob := make([]byte, len(byteSlice))
-			for i, v := range byteSlice {
-				// Wails serializes numbers as float64
-				b, ok := v.(float64)
-				if !ok {
-					return nil, fmt.Errorf("invalid byte value at index %d: %#v", i, v)
-				}
-				blob[i] = byte(b) // Convert float64 to byte
-			}
+			pm.LogPrintf("Blob: %v", blob)
 
 			// show the save file dialog
 			options := runtime.SaveDialogOptions{
@@ -47,14 +55,14 @@ func Register(pm *plugins.PluginManager) {
 			filePath, saveFileError := runtime.SaveFileDialog(pm.Context, options)
 
 			if saveFileError != nil {
-				return nil, saveFileError
+				return pm.FromError(saveFileError.Error())
 			}
 
 			// save the file
 			file, fileCreateError := os.Create(filePath)
 
 			if fileCreateError != nil {
-				return nil, fileCreateError
+				return pm.FromError(fileCreateError.Error())
 			}
 
 			defer file.Close()
@@ -62,12 +70,21 @@ func Register(pm *plugins.PluginManager) {
 			_, writeError := file.Write(blob)
 
 			if writeError != nil {
-				return nil, writeError
+				return pm.FromError(writeError.Error())
 			}
 
 			file.Sync()
 
-			return nil, nil
+			var output QRCodeOutput
+			output.Ok = true
+
+			outputBytes, err := json.Marshal(output)
+
+			if err != nil {
+				return pm.Errorf("failed to marshal result: %v", err)
+			}
+
+			return string(outputBytes)
 		},
 	})
 }

@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/card";
 import { Copy } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { inputStringToObjectString, outputObjectStringToString } from "./schemas/base64";
 
 export default function Base64() {
   type Operation = "encode" | "decode";
@@ -24,8 +25,20 @@ export default function Base64() {
   const { toast } = useToast();
 
   const onSubmit = useCallback(() => {
-    CallPlugin("base64", operation, [text]).then((result) => {
-      setOutput(result);
+    const args = inputStringToObjectString(text);
+    CallPlugin("base64", operation, args).then((output) => {
+      const result = outputObjectStringToString(output);
+
+      if (typeof result === "string") {
+        setOutput(result);
+      } else {
+        toast({
+          title: "Error",
+          description: (result as Error).message,
+          variant: "destructive",
+          duration: 2000,
+        });
+      }
     });
   }, [operation, text]);
 

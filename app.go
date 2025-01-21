@@ -51,6 +51,6 @@ func (a *App) GetRegisteredPlugins() []string {
 	return a.pluginManager.GetRegisteredPlugins()
 }
 
-func (a *App) CallPlugin(pluginID, functionName string, args ...interface{}) (interface{}, error) {
-	return a.pluginManager.Call(pluginID, functionName, args...)
+func (a *App) CallPlugin(pluginID, functionName string, args string) string {
+	return a.pluginManager.Call(pluginID, functionName, args)
 }

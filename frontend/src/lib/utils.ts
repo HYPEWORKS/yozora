@@ -12,3 +12,7 @@ export const getModifierKey = () => {
   const platform = navigator.userAgentData?.platform || navigator.platform || "unknown";
   return /Mac|iPod|iPhone|iPad/.test(platform) ? "⌘" : "Ctrl";
 };
+
+export function uint8ArrayToBase64(data: Uint8Array): string {
+  return btoa(String.fromCharCode(...data));
+}

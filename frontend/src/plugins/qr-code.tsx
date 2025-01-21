@@ -7,6 +7,8 @@ import { BrowserOpenURL } from "../../wailsjs/runtime/runtime";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
+import { uint8ArrayToBase64 } from "@/lib/utils";
+import { inputStringToObjectString, outputObjectStringToString } from "./schemas/qr-code";
 
 export default function QR_Code() {
   const [data, setData] = useState<string>("");
@@ -32,16 +34,27 @@ export default function QR_Code() {
       const arrayBuffer = await blob.arrayBuffer();
       const uint8Array = new Uint8Array(arrayBuffer);
 
-      // and then finally convert Uint8Array to a plain array of numbers
-      const byteArray = Array.from(uint8Array);
+      // and then convert the Uint8Array to a base64 string so we can transmit it through JSON
+      const dataString = uint8ArrayToBase64(uint8Array);
 
-      await CallPlugin("qr-code", "save", byteArray);
+      const request = inputStringToObjectString(dataString);
 
-      toast({
-        title: "QR Code saved",
-        description: "Your QR Code has been saved!",
-        duration: 1500,
-      });
+      const result = outputObjectStringToString(await CallPlugin("qr-code", "save", request));
+
+      if (typeof result === "string") {
+        toast({
+          title: "QR Code saved",
+          description: "Your QR Code has been saved!",
+          duration: 1500,
+        });
+      } else {
+        toast({
+          title: "Unable to save QR Code",
+          description: (result as Error).message,
+          variant: "destructive",
+          duration: 2000,
+        });
+      }
     }
   };
 

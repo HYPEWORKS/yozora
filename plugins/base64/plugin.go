@@ -2,70 +2,65 @@ package base64plugin
 
 import (
 	"encoding/base64"
-	"fmt"
 
+	json "github.com/goccy/go-json"
 	"hypeworks.com/yozora/plugins"
 )
 
+type Base64Input struct {
+	Input string `json:"input"`
+}
+
+type Base64Output struct {
+	Output string `json:"output"`
+}
+
 func Register(pm *plugins.PluginManager) {
 	pm.RegisterPlugin("base64", map[string]plugins.PluginFunc{
-		"encode": func(args ...interface{}) (interface{}, error) {
-			if len(args) < 1 {
-				return nil, fmt.Errorf("encode expects at least 1 argument")
+		"encode": func(args string) string {
+			var input Base64Input
+			err := json.Unmarshal([]byte(args), &input)
+			if err != nil {
+				return pm.Errorf("failed to unmarshal input: %v", err)
 			}
 
-			var input string
+			output := base64.StdEncoding.EncodeToString([]byte(input.Input))
 
-			// Check if the first argument is a string
-			if str, ok := args[0].(string); ok {
-				input = str
-			} else {
-				// Handle array-like input
-				if slice, ok := args[0].([]interface{}); ok && len(slice) > 0 {
-					if str, ok := slice[0].(string); ok {
-						input = str
-					} else {
-						return nil, fmt.Errorf("invalid input type in array: %#v", slice[0])
-					}
-				} else {
-					return nil, fmt.Errorf("input is not a string or array of strings")
-				}
+			result := Base64Output{
+				Output: output,
 			}
 
-			return base64.StdEncoding.EncodeToString([]byte(input)), nil
+			resultBytes, err := json.Marshal(result)
+
+			if err != nil {
+				return pm.Errorf("failed to marshal result: %v", err)
+			}
+
+			return string(resultBytes)
 		},
-		"decode": func(args ...interface{}) (interface{}, error) {
-			if len(args) < 1 {
-				return nil, fmt.Errorf("decode expects at least 1 argument")
+		"decode": func(args string) string {
+			var input Base64Input
+			err := json.Unmarshal([]byte(args), &input)
+			if err != nil {
+				return pm.Errorf("failed to unmarshal input: %v", err)
 			}
 
-			// Handle single string input
-			if input, ok := args[0].(string); ok {
-				decoded, err := base64.StdEncoding.DecodeString(input)
-				if err != nil {
-					return nil, fmt.Errorf("failed to decode input: %v", err)
-				}
-				return string(decoded), nil
+			output, err := base64.StdEncoding.DecodeString(input.Input)
+			if err != nil {
+				return pm.Errorf("failed to decode input: %v", err)
 			}
 
-			// Handle array of strings for batch decoding
-			if slice, ok := args[0].([]interface{}); ok {
-				results := []string{}
-				for _, item := range slice {
-					if str, ok := item.(string); ok {
-						decoded, err := base64.StdEncoding.DecodeString(str)
-						if err != nil {
-							return nil, fmt.Errorf("failed to decode input '%s': %v", str, err)
-						}
-						results = append(results, string(decoded))
-					} else {
-						return nil, fmt.Errorf("invalid input type in array: %#v", item)
-					}
-				}
-				return results, nil // Return decoded results as an array
+			result := Base64Output{
+				Output: string(output),
 			}
 
-			return nil, fmt.Errorf("input is not a string or array of strings")
+			resultBytes, err := json.Marshal(result)
+
+			if err != nil {
+				return pm.Errorf("failed to marshal result: %v", err)
+			}
+
+			return string(resultBytes)
 		},
 	})
 }
