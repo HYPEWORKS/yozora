@@ -13,6 +13,17 @@ import React from "react";
 import CharmBar from "@/components/CharmBar";
 import TabBar, { Tab } from "@/components/TabBar";
 import { Toaster } from "./components/ui/toaster";
+import {
+  Command,
+  CommandDialog,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+  CommandSeparator,
+  CommandShortcut,
+} from "@/components/ui/command";
 
 function App() {
   const [availablePluginIDs, setAvailablePluginIDs] = useState<string[]>([]);
@@ -78,12 +89,27 @@ function App() {
     return React.createElement(plugin.component);
   }, [selectedPluginID]);
 
+  // Start up the app and get the list of registered plugins
   useEffect(() => {
     setTimeout(() => {
       OnAppStarted().then(() => {
         GetRegisteredPlugins().then(updateAvailablePluginIDs);
       });
     }, 0);
+  }, []);
+
+  const [commandOpen, setCommandOpen] = useState(false);
+
+  // Shortcut handling to open/close the command dialog
+  useEffect(() => {
+    const down = (e: KeyboardEvent) => {
+      if (e.key === "k" && (e.metaKey || e.ctrlKey)) {
+        e.preventDefault();
+        setCommandOpen((open) => !open);
+      }
+    };
+    document.addEventListener("keydown", down);
+    return () => document.removeEventListener("keydown", down);
   }, []);
 
   return (
@@ -110,14 +136,18 @@ function App() {
                 {availablePluginIDs.map((pluginID) => {
                   const plugin = plugins[pluginID];
                   return (
-                    <SelectItem key={pluginID} value={pluginID} className="relative flex items-center">
+                    <SelectItem
+                      key={pluginID}
+                      value={pluginID}
+                      className="relative flex items-center"
+                    >
                       <span className="flex-grow">{plugin.name}</span>
                       {plugin.beta && (
                         <span className="absolute left-[19rem] text-xs p-1 bg-orange-500 text-white">
                           Beta
                         </span>
                       )}
-                  </SelectItem>
+                    </SelectItem>
                   );
                 })}
               </SelectGroup>
@@ -134,6 +164,21 @@ function App() {
         </div>
       </main>
       <Toaster />
+      <CommandDialog open={commandOpen} onOpenChange={setCommandOpen}>
+        <Command>
+          <CommandInput placeholder="Type a command..." />
+          <CommandList>
+            <CommandEmpty>No results found.</CommandEmpty>
+            <CommandGroup heading="Commands">
+              {availablePluginIDs.map((pluginID) => {
+                const plugin = plugins[pluginID];
+                return <CommandItem key={pluginID}>{plugin.name}</CommandItem>;
+              })}
+            </CommandGroup>
+            <CommandSeparator />
+          </CommandList>
+        </Command>
+      </CommandDialog>
     </>
   );
 }
