@@ -8,7 +8,19 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { uint8ArrayToBase64 } from "@/lib/utils";
-import { inputStringToObjectString, outputObjectStringToString } from "./schemas/qr-code";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { QrCode, Download, ExternalLink } from "lucide-react";
+import {
+  inputStringToObjectString,
+  outputObjectStringToString,
+} from "./schemas/qr-code";
+import { motion } from "framer-motion";
 
 export default function QR_Code() {
   const [data, setData] = useState<string>("");
@@ -39,7 +51,9 @@ export default function QR_Code() {
 
       const request = inputStringToObjectString(dataString);
 
-      const result = outputObjectStringToString(await CallPlugin("qr-code", "save", request));
+      const result = outputObjectStringToString(
+        await CallPlugin("qr-code", "save", request)
+      );
 
       if (typeof result === "string") {
         toast({
@@ -48,12 +62,23 @@ export default function QR_Code() {
           duration: 1500,
         });
       } else {
-        toast({
-          title: "Unable to save QR Code",
-          description: (result as Error).message,
-          variant: "destructive",
-          duration: 2000,
-        });
+        const message = (result as Error).message;
+
+        if (message === "No file selected") {
+          toast({
+            title: "No file selected",
+            description: "Please select a file to download the QR Code",
+            variant: "default",
+            duration: 2000,
+          });
+        } else {
+          toast({
+            title: "Unable to save QR Code",
+            description: message,
+            variant: "destructive",
+            duration: 2000,
+          });
+        }
       }
     }
   };
@@ -63,33 +88,61 @@ export default function QR_Code() {
   };
 
   return (
-    <div>
-      <p>QR Code Generator</p>
-      <small className="text-gray-400">
-        More customization options coming soon
-      </small>
-      <Input value={data} onChange={(e) => setData(e.target.value)} />
-      <Button onClick={() => generateQR(data)}>Generate QR Code</Button>
-      {generatedDataUrl && (
-        <>
-          <img src={generatedDataUrl} alt="QR Code" className="mt-6" />
-          <Button onClick={downloadQR}>Download QR Code</Button>
-        </>
-      )}
-      <br />
-      <div className="flex flex-col w-full items-center mt-10">
-        <small className="text-gray-400 text-center">
-          “QR Code” is registered trademark of{" "}
-          <a
-            href="#"
-            onClick={openDensoWaveLink}
-            className="underline text-red-500 hover:cursor-pointer hover:text-red-700"
-          >
-            DENSO WAVE INCORPORATED
-          </a>{" "}
-          in Japan and other countries.
-        </small>
-      </div>
-    </div>
+    <>
+      <Card className="w-full max-w-md mx-auto">
+        <CardHeader>
+          <CardTitle className="text-2xl font-bold text-center">
+            QR Code Generator
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-2">
+            <Input
+              value={data}
+              onChange={(e) => setData(e.target.value)}
+              placeholder="Enter text or URL"
+              className="w-full"
+            />
+            <Button onClick={() => generateQR(data)} className="w-full">
+              <QrCode className="w-4 h-4 mr-2" />
+              Generate QR Code
+            </Button>
+          </div>
+          {generatedDataUrl && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.3 }}
+              className="flex flex-col items-center space-y-4"
+            >
+              <img
+                src={generatedDataUrl || "/placeholder.svg"}
+                alt="QR Code"
+                className="w-48 h-48"
+              />
+              <Button onClick={downloadQR} variant="outline" className="w-full">
+                <Download className="w-4 h-4 mr-2" />
+                Download QR Code
+              </Button>
+            </motion.div>
+          )}
+        </CardContent>
+        <CardFooter className="flex flex-col items-center text-center text-sm text-gray-500">
+          <p>More customization options coming soon</p>
+        </CardFooter>
+      </Card>
+      <p className="mt-6 text-center text-xs">
+        "QR Code" is registered trademark of{" "}
+        <Button
+          variant="link"
+          className="p-0 h-auto text-red-500 hover:text-red-700 cursor-pointer"
+          onClick={openDensoWaveLink}
+        >
+          DENSO WAVE INCORPORATED
+          <ExternalLink className="w-3 h-3 mr-1 inline" />
+        </Button>{" "}
+        in Japan and other countries.
+      </p>
+    </>
   );
 }

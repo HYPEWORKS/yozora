@@ -26,6 +26,7 @@ export default function Base64() {
 
   const onSubmit = useCallback(() => {
     const args = inputStringToObjectString(text);
+    setOutput("");
     CallPlugin("base64", operation, args).then((output) => {
       const result = outputObjectStringToString(output);
 

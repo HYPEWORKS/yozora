@@ -176,6 +176,11 @@ function App() {
               })}
             </CommandGroup>
             <CommandSeparator />
+            <CommandGroup heading="Shortcuts">
+              <CommandItem>Open Settings</CommandItem>
+              <CommandItem>Check for Updates</CommandItem>
+              <CommandItem>About</CommandItem>
+            </CommandGroup>
           </CommandList>
         </Command>
       </CommandDialog>

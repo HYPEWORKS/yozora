@@ -20,12 +20,8 @@ type QRCodeOutput struct {
 func Register(pm *plugins.PluginManager) {
 	pm.RegisterPlugin("qr-code", map[string]plugins.PluginFunc{
 		"save": func(args string) string {
-			pm.LogPrintf("Saving QR Code")
-
 			var input QRCodeInput
 			err := json.Unmarshal([]byte(args), &input)
-
-			pm.LogPrintf("Input: %v", input)
 
 			if err != nil {
 				return pm.Errorf("failed to unmarshal input: %v", err)
@@ -37,8 +33,6 @@ func Register(pm *plugins.PluginManager) {
 			if err != nil {
 				return pm.Errorf("failed to decode input: %v", err)
 			}
-
-			pm.LogPrintf("Blob: %v", blob)
 
 			// show the save file dialog
 			options := runtime.SaveDialogOptions{
@@ -53,6 +47,10 @@ func Register(pm *plugins.PluginManager) {
 			}
 
 			filePath, saveFileError := runtime.SaveFileDialog(pm.Context, options)
+
+			if filePath == "" {
+				return pm.FromError("No file selected")
+			}
 
 			if saveFileError != nil {
 				return pm.FromError(saveFileError.Error())
