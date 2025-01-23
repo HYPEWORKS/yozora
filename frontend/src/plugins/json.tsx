@@ -1,6 +1,6 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Editor } from "@monaco-editor/react";
+import { Editor, useMonaco } from "@monaco-editor/react";
 
 export default function Json() {
   const [json, setJson] = useState<string>("{}");
@@ -12,6 +12,18 @@ export default function Json() {
   const minify = useCallback(() => {
     setJson(JSON.stringify(JSON.parse(json)));
   }, [json]);
+
+  const monaco = useMonaco();
+
+  useEffect(() => {
+    // TODO: fix bug where closing the command palette doesn't focus back on the editor
+    if (monaco) {
+      monaco.editor.addKeybindingRule({
+        keybinding: monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyK,
+        command: undefined, // don't propagate, so that we can use the command palette
+      });
+    }
+  }, [monaco]);
 
   // TODO: make tabs/spaces and tab size configurable
 

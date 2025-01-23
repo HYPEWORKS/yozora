@@ -127,7 +127,7 @@ function App() {
       </span>
       <main className="ml-16 flex flex-col min-h-fit p-3">
         <div>
-          <Select onValueChange={setSelectedPluginID}>
+          <Select value={selectedPluginID || undefined} onValueChange={setSelectedPluginID}>
             <SelectTrigger className="w-96 relative">
               <SelectValue placeholder="Select a plugin" />
             </SelectTrigger>
@@ -165,14 +165,17 @@ function App() {
       </main>
       <Toaster />
       <CommandDialog open={commandOpen} onOpenChange={setCommandOpen}>
-        <Command>
+        <Command loop>
           <CommandInput placeholder="Type a command..." />
           <CommandList>
             <CommandEmpty>No results found.</CommandEmpty>
             <CommandGroup heading="Commands">
               {availablePluginIDs.map((pluginID) => {
                 const plugin = plugins[pluginID];
-                return <CommandItem key={pluginID}>{plugin.name}</CommandItem>;
+                return <CommandItem onSelect={() => {
+                  setSelectedPluginID(pluginID)
+                  setCommandOpen(false)
+                }} key={pluginID}>{plugin.name}</CommandItem>;
               })}
             </CommandGroup>
             <CommandSeparator />
