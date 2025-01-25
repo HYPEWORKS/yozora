@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { ErrorResultSchema } from "./Base";
+import { ErrorResultSchema } from "../schemas/Base";
 
 export type HttpMethod = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
 export type MockDataContentType = "lorem" | "faker" | "static";

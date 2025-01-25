@@ -10,6 +10,7 @@ import (
 
 	base64plugin "hypeworks.com/yozora/plugins/base64"
 	loremipsumplugin "hypeworks.com/yozora/plugins/lorem-ipsum"
+	mockhttpplugin "hypeworks.com/yozora/plugins/mock-http"
 	qrcodeplugin "hypeworks.com/yozora/plugins/qr-code"
 )
 
@@ -35,6 +36,7 @@ func (a *App) startup(ctx context.Context) {
 	base64plugin.Register(a.pluginManager)
 	loremipsumplugin.Register(a.pluginManager)
 	qrcodeplugin.Register(a.pluginManager)
+	mockhttpplugin.Register(a.pluginManager)
 }
 
 func (a *App) OnAppStarted() {

@@ -70,7 +70,7 @@ function SettingsCharm({ className }: { className?: string }) {
 export default function CharmBar() {
   return (
     <TooltipProvider>
-      <div className="fixed top-0 left-0 h-dvh min-h-dvh max-h-dvh w-16 bg-gray-800 text-white flex flex-col items-center justify-between py-3">
+      <div className="fixed top-0 left-0 h-dvh min-h-dvh max-h-dvh w-12 bg-gray-800 text-white flex flex-col items-center justify-between py-3">
         <div className="flex flex-col items-center gap-2">
           {/* Other charms can go here */}
         </div>
