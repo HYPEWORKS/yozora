@@ -16,15 +16,9 @@ export const MethodSchema = z.object({
   headers: z.record(z.string()).optional(),
 });
 
-const baseEndpointSchema = z.object({
+export const EndpointSchema = z.object({
   path: z.string(),
   methods: z.record(z.enum(["GET", "POST", "PUT", "PATCH", "DELETE"]), MethodSchema),
-});
-
-type MetaEndpoint = z.infer<typeof baseEndpointSchema> & { children?: MetaEndpoint[] };
-
-export const EndpointSchema: z.ZodType<MetaEndpoint> = baseEndpointSchema.extend({
-  children: z.lazy(() => EndpointSchema.array()).optional(),
 });
 
 export type Endpoint = z.infer<typeof EndpointSchema>;

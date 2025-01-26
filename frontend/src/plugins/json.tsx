@@ -1,6 +1,7 @@
 import { useState, useCallback, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Editor, useMonaco } from "@monaco-editor/react";
+import { Braces, DatabaseZap, Minimize2 } from "lucide-react";
 
 export default function Json() {
   const [json, setJson] = useState<string>("{}");
@@ -31,10 +32,16 @@ export default function Json() {
     <div className="flex flex-col max-h-fit">
       <div className="flex justify-between items-center">
         <Button className="mb-3" onClick={prettify}>
+          <Braces />
           Prettify
         </Button>
         <Button className="mb-3" onClick={minify}>
+          <Minimize2 />
           Minify
+        </Button>
+        <Button className="mb-3" onClick={() => {}} disabled>
+          <DatabaseZap />
+          Query
         </Button>
       </div>
       <div className="flex-grow" style={{ height: "calc(100vh - 180px)" }}>
