@@ -5,18 +5,19 @@ import { Label } from "@/components/ui/label"
 import { Card, CardContent } from "@/components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Trash2 } from "lucide-react"
-import type { HttpMethod, MockDataContentType } from "./schema"
+import type { Endpoint, MockDataContentType } from "./schema"
 
 interface RouteConfigProps {
-  onDelete: () => void
-  isRunning: boolean
+  route: Endpoint;
+  onDelete: () => void;
+  onUpdate: (updatedRoute: Endpoint) => void;
+  isRunning: boolean;
 }
 
-export function RouteConfig({ onDelete, isRunning }: RouteConfigProps) {
-  const [method, setMethod] = useState<HttpMethod>("GET")
-  const [path, setPath] = useState("")
-  const [statusCode, setStatusCode] = useState("200")
-  const [contentType, setContentType] = useState<MockDataContentType>("lorem")
+export function RouteConfig({ route, onDelete, onUpdate, isRunning }: RouteConfigProps) {
+  const handleFieldChange = (field: keyof Endpoint, value: any) => {
+    onUpdate({ ...route, [field]: value });
+  };
 
   return (
     <Card className="mb-4">
@@ -24,7 +25,7 @@ export function RouteConfig({ onDelete, isRunning }: RouteConfigProps) {
         <div className="grid grid-cols-12 gap-4">
           <div className="col-span-3">
             <Label htmlFor="method">Method</Label>
-            <Select value={method} onValueChange={(value) => setMethod(value as HttpMethod)} disabled={isRunning}>
+            <Select value={route.method} onValueChange={(e) => handleFieldChange("path", e)} disabled={isRunning}>
               <SelectTrigger id="method">
                 <SelectValue placeholder="Select method" />
               </SelectTrigger>
@@ -41,8 +42,8 @@ export function RouteConfig({ onDelete, isRunning }: RouteConfigProps) {
             <Label htmlFor="path">Path</Label>
             <Input
               id="path"
-              value={path}
-              onChange={(e) => setPath(e.target.value)}
+              value={route.path}
+              onChange={(e) => handleFieldChange("path", e.target.value)}
               placeholder="/api/example"
               disabled={isRunning}
             />
@@ -51,8 +52,9 @@ export function RouteConfig({ onDelete, isRunning }: RouteConfigProps) {
             <Label htmlFor="statusCode">Status</Label>
             <Input
               id="statusCode"
-              value={statusCode}
-              onChange={(e) => setStatusCode(e.target.value)}
+              value={route.statusCode}
+              type="number"
+              onChange={(e) => handleFieldChange("statusCode", parseInt(e.target.value, 10))}
               placeholder="200"
               disabled={isRunning}
             />
@@ -60,8 +62,8 @@ export function RouteConfig({ onDelete, isRunning }: RouteConfigProps) {
           <div className="col-span-2">
             <Label htmlFor="contentType">Content</Label>
             <Select
-              value={contentType}
-              onValueChange={(value) => setContentType(value as MockDataContentType)}
+              value={route.mockData.type}
+              onValueChange={(e) => handleFieldChange("mockData", { ...route.mockData, type: e as MockDataContentType })}
               disabled={isRunning}
             >
               <SelectTrigger id="contentType">

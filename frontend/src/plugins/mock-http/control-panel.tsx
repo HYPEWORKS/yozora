@@ -5,21 +5,48 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Plus } from "lucide-react";
 import { RouteConfig } from "./route-config";
+import { ServerConfigAtom, Endpoint } from "./schema";
+import { useAtom } from "jotai";
 
 interface ControlPanelProps {
   isRunning: boolean;
 }
 
 export function ControlPanel({ isRunning }: ControlPanelProps) {
-  const [port, setPort] = useState("6969");
-  const [routes, setRoutes] = useState([{}]);
+  const [serverConfig, setServerConfig] = useAtom(ServerConfigAtom);
+
+  // Use `serverConfig.endpoints` as the source of truth for the routes.
+  const routes = serverConfig.endpoints || [];
+
+  const setRoutes = (updatedRoutes: Endpoint[]) => {
+    setServerConfig({ ...serverConfig, endpoints: updatedRoutes });
+  };
 
   const addRoute = () => {
-    setRoutes([...routes, {}]);
+    setRoutes([
+      ...routes,
+      {
+        path: "/",
+        method: "GET",
+        mockData: { type: "json", content: "{}" },
+        statusCode: 200,
+        headers: {},
+      },
+    ]);
   };
 
   const removeRoute = (index: number) => {
     setRoutes(routes.filter((_, i) => i !== index));
+  };
+
+  const updateRoute = (index: number, updatedRoute: Endpoint) => {
+    const newRoutes = [...routes];
+    newRoutes[index] = updatedRoute;
+    setRoutes(newRoutes);
+  };
+
+  const handlePortChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setServerConfig({ ...serverConfig, port: parseInt(e.target.value, 10) || 0 });
   };
 
   return (
@@ -30,10 +57,17 @@ export function ControlPanel({ isRunning }: ControlPanelProps) {
       </TabsList>
       <TabsContent value="routes" className="overflow-y-auto max-h-[calc(95vh-18rem)]">
         <div className="space-y-4">
-          {routes.map((_, index) => (
+          {routes.length === 0 && (
+            <div className="text-center text-sm text-muted-foreground">
+              No routes added. A default <pre className="inline">GET</pre> route at the root (<pre className="inline">/</pre>) will be added. It will return lorem ipsum data with a status code of 200.
+            </div>
+          )}
+          {routes.map((route, index) => (
             <RouteConfig
               key={index}
+              route={route}
               onDelete={() => removeRoute(index)}
+              onUpdate={(updatedRoute) => updateRoute(index, updatedRoute)}
               isRunning={isRunning}
             />
           ))}
@@ -48,8 +82,8 @@ export function ControlPanel({ isRunning }: ControlPanelProps) {
             <Label htmlFor="port">Port</Label>
             <Input
               id="port"
-              value={port}
-              onChange={(e) => setPort(e.target.value)}
+              value={serverConfig.port || ""}
+              onChange={handlePortChange}
               placeholder="6969"
               disabled={isRunning}
             />

@@ -11,11 +11,12 @@ import (
 
 	"hypeworks.com/yozora/plugins"
 
+	"github.com/go-loremipsum/loremipsum"
 	"github.com/labstack/echo/v4"
 	"golang.org/x/net/websocket"
 )
 
-// TODO: make this be multiple instances (aka multiple tabs in the frontend)
+// TODO: make this support multiple instances (aka multiple tabs in the frontend)
 
 var (
 	server     *http.Server
@@ -26,13 +27,40 @@ var (
 	wsClientsMu sync.Mutex
 )
 
+type MockData struct {
+	Type    string `json:"type"` // "text", "json", "xml"
+	Content string `json:"content"`
+}
+
+type Method struct {
+	MockData   MockData          `json:"mockData"`
+	StatusCode int               `json:"statusCode"`
+	Headers    map[string]string `json:"headers,omitempty"`
+}
+
+type Endpoint struct {
+	Path       string            `json:"path"`
+	Method     string            `json:"method"` // "GET", "POST", "PUT", "PATCH", "DELETE"
+	MockData   MockData          `json:"mockData"`
+	StatusCode int               `json:"statusCode"`
+	Headers    map[string]string `json:"headers,omitempty"`
+}
+
+type ProxyInput struct {
+	URL string `json:"url"`
+}
+
 type MockHTTPInput struct {
-	Port int `json:"port"`
+	Version   string      `json:"version"`
+	Port      int         `json:"port"`
+	Proxy     *ProxyInput `json:"proxy,omitempty"`
+	Endpoints []Endpoint  `json:"endpoints"`
 }
 
 type MockHTTPOutput struct {
-	Status int    `json:"status"`
-	Error  string `json:"error"`
+	Ok        bool   `json:"ok"`
+	IsRunning *bool  `json:"is_running,omitempty"`
+	Error     string `json:"error,omitempty"`
 }
 
 func broadcastToClients(message string) {
@@ -134,13 +162,39 @@ func Register(pm *plugins.PluginManager) {
 				return nil
 			})
 
-			e.GET("/", func(c echo.Context) error {
-				return c.String(http.StatusOK, "Hello, World!")
-			})
-
-			e.GET("/test", func(c echo.Context) error {
-				return c.String(http.StatusOK, "Test")
-			})
+			if len(params.Endpoints) == 0 {
+				e.GET("/", func(c echo.Context) error {
+					return c.String(http.StatusOK, loremipsum.New().Words(12))
+				})
+			} else {
+				for _, ep := range params.Endpoints {
+					endpoint := ep
+					switch endpoint.Method {
+					case "GET":
+						e.GET(endpoint.Path, func(c echo.Context) error {
+							return c.JSON(endpoint.StatusCode, endpoint.MockData)
+						})
+					case "POST":
+						e.POST(endpoint.Path, func(c echo.Context) error {
+							return c.JSON(endpoint.StatusCode, endpoint.MockData)
+						})
+					case "PUT":
+						e.PUT(endpoint.Path, func(c echo.Context) error {
+							return c.JSON(endpoint.StatusCode, endpoint.MockData)
+						})
+					case "PATCH":
+						e.PATCH(endpoint.Path, func(c echo.Context) error {
+							return c.JSON(endpoint.StatusCode, endpoint.MockData)
+						})
+					case "DELETE":
+						e.DELETE(endpoint.Path, func(c echo.Context) error {
+							return c.JSON(endpoint.StatusCode, endpoint.MockData)
+						})
+					default:
+						return pm.Errorf("Invalid method: %s", endpoint.Method)
+					}
+				}
+			}
 
 			server = &http.Server{
 				Addr:    fmt.Sprintf(":%d", port),
@@ -165,10 +219,10 @@ func Register(pm *plugins.PluginManager) {
 			defer serverLock.Unlock()
 
 			if isRunning {
-				return `{"ok": true, "status": 200, "message": "Server is running"}`
+				return `{"ok": true, "status": 200, "is_running": true}`
 			}
 
-			return `{"ok": true, "status": 200, "message": "Server is not running"}`
+			return `{"ok": true, "status": 200, "is_running": false}`
 		},
 		"stop": func(args string) string {
 			serverLock.Lock()

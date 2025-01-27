@@ -4,6 +4,8 @@ import { Play, Square } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { CallPlugin } from "../../../wailsjs/go/main/App";
 import { useToast } from "@/hooks/use-toast";
+import { useAtomValue } from "jotai";
+import { ServerConfigAtom } from "./schema";
 
 interface StartButtonProps {
   isRunning: boolean;
@@ -12,6 +14,8 @@ interface StartButtonProps {
 
 export function StartButton({ isRunning, onToggle }: StartButtonProps) {
   const { toast } = useToast();
+
+  const serverConfig = useAtomValue(ServerConfigAtom);
 
   const [isWaiting, setIsWaiting] = useState(false);
 
@@ -32,7 +36,7 @@ export function StartButton({ isRunning, onToggle }: StartButtonProps) {
       return;
     }
 
-    const res = await CallPlugin("mock-http", "start", `{ "port": 6969 }`);
+    const res = await CallPlugin("mock-http", "start", JSON.stringify(serverConfig));
 
     // TODO: type this properly using the zod schema
     const result = JSON.parse(res);
@@ -64,7 +68,7 @@ export function StartButton({ isRunning, onToggle }: StartButtonProps) {
       onClick={handleClick}
       disabled={isWaiting}
       className={cn(
-        "relative flex items-center justify-center w-16 h-16 rounded-full text-white shadow-lg hover:shadow-xl transition-shadow",
+        "relative flex items-center justify-center w-16 h-16 rounded-full text-white shadow-lg hover:shadow-xl transition-all duration-200",
         isRunning
           ? "bg-red-500 hover:bg-red-600"
           : "bg-green-500 hover:bg-green-600"

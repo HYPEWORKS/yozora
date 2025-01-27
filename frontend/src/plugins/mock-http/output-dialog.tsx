@@ -18,6 +18,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { SquareTerminal } from "lucide-react";
+import { Label } from "@/components/ui/label";
 
 // TODO: rather than just rawdogging the messages into the Textarea, we should parse them and display them in a more readable format
 // NOTE: move this into the button to retain message history
@@ -67,11 +68,13 @@ function OutputDialogContent() {
           ref={textareaRef}
           className="w-full h-96 resize-none scrollbar-thin scrollbar-thumb-gray-500 scrollbar-track-gray-200"
           readOnly
-          value={messages.join("\n")} // Render messages in the Textarea
+          value={messages.join("\n")}
         />
       </div>
       <DialogFooter>
-        <DialogDescription>History will be cleared when this popup is closed.</DialogDescription>
+        <Label className="text-sm text-muted-foreground">
+          History will be cleared when this popup is closed.
+        </Label>
         <DialogClose asChild>
           <Button type="submit">Close</Button>
         </DialogClose>
@@ -87,9 +90,7 @@ export default function OutputDialogButton() {
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger>
-              <button>
-                <SquareTerminal />
-              </button>
+              <SquareTerminal className="text-gray-300 hover:text-white transition-all duration-200" />
             </TooltipTrigger>
             <TooltipContent side="top" align="center" sideOffset={10}>
               <p>Server Output</p>
